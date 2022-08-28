@@ -1,6 +1,4 @@
-import mongoose from "mongoose";
+import { MongoClient } from "mongodb";
 
-export async function start_server() {
-  if (process.env.DB_URL) return await mongoose.connect(process.env.DB_URL);
-  console.log("Can't connect to DB");
-}
+let url = process.env.DB_URL as string | "";
+export const dbClient = new MongoClient(url);
