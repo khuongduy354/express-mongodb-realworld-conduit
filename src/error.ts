@@ -4,7 +4,7 @@ import { logger } from "./logger";
 export class AppError extends Error {
   statusCode: number;
 
-  constructor(statusCode: number, message: string, err?: any) {
+  constructor(statusCode: number, message = "Something went wrong", err?: any) {
     if (err instanceof mongoose.Error.ValidationError) {
       statusCode = 400;
       message = err.message;
