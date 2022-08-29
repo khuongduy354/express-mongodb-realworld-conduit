@@ -1,11 +1,19 @@
 import mongoose from "mongoose";
-import { UserDocument } from "../types/user";
 
+type UserDocument = {
+  email: "jake@jake.jake";
+  username: "jake";
+  bio: "I work at statefarm";
+  image: "https://api.realworld.io/images/smiley-cyrus.jpg";
+  // following: false;
+};
 const UserSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    password: { type: String, required: true },
+    email: { required: true, type: String },
+    username: { required: true, type: String },
+    hashedPassword: { required: true, type: String },
+    bio: String,
+    image: String,
   },
   { timestamps: true }
 );
