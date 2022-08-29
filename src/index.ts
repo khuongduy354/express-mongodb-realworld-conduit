@@ -1,11 +1,12 @@
-//boostrap expressjs
+import { configDb } from "./config/mongodb";
 import { rateLimit } from "express-rate-limit";
-import { logger } from "./logger";
 import express, { NextFunction, Request, Response } from "express";
 import "dotenv/config";
-import { AppError, errorHandler } from "./error";
+import { errorHandler } from "./error";
+
 const PORT = process.env.PORT || 3000;
 const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const limiter = rateLimit({
@@ -15,6 +16,7 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 app.use(limiter);
+configDb();
 
 //testing routes
 app.get("/helloworld", (req, res) => {

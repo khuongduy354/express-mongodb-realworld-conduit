@@ -4,16 +4,17 @@ import { logger } from "./logger";
 export class AppError extends Error {
   statusCode: number;
 
-  constructor(statusCode: number, message = "Something went wrong", err?: any) {
-    if (err instanceof mongoose.Error.ValidationError) {
-      statusCode = 400;
+  constructor(statusCode: number, message: string, err?: any) {
+    if (message == "mongodb error") {
       message = err.message;
-    } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
-      statusCode = 404;
-      message = err.message;
+      super(message);
+      this.stack = err.stack;
+      this.statusCode = statusCode;
+    } else {
+      super(message);
+      this.statusCode = statusCode;
+      Error.captureStackTrace(this);
     }
-    super(message);
-    this.statusCode = statusCode;
   }
 }
 
@@ -30,10 +31,10 @@ class ErrorHandler {
     }
 
     //logging
-    logger.error(message, stack);
+    logger.error({ message, stack, statusCode });
 
     //response
-    res && res.status(statusCode).json({ error: { message } });
+    res ? res.status(statusCode).json({ error: { message } }) : null;
   }
 
   public isTrustedError(error: Error): boolean {
