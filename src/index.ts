@@ -1,8 +1,9 @@
+import { logger } from "./logger";
 import { configDb } from "./config/mongodb";
 import { rateLimit } from "express-rate-limit";
 import express, { NextFunction, Request, Response } from "express";
 import "dotenv/config";
-import { errorHandler } from "./error";
+import { AppError, errorHandler } from "./error";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -17,24 +18,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 configDb();
-
+import { UserRoute } from "./routes/user.route";
+app.use("/v1", UserRoute);
 //testing routes
 app.get("/helloworld", (req, res) => {
-  res.send("Hello World");
-  let promise = new Promise(() => {
-    throw new Error("Something went wrong");
-  });
-  promise.catch((e) => {
-    throw e;
-  });
+  res.send("helloworld");
 });
 
 app.listen(PORT, () => {
-  console.log("Server is running on port " + PORT.toString());
+  logger.info("Server is running on port " + PORT.toString());
 });
 
 // Error handling
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
   errorHandler.handleError(err, res);
   if (!errorHandler.isTrustedError(err)) {
     process.exit(1);
