@@ -21,3 +21,13 @@ For more information on how to this works with other frontends/backends, head ov
 
 > npm install, npm start, etc.
 
+# Todo 
+- send missing required parameters requests.
+- change schemas
+- change types of documents. 
+# Notes 
+- followees instead of followers due to project requirements
+- tag 2 ways rel: from tags find articles & from articles populate tags. 
+- mongodb error handling bug, due to so many instances of mongoose Error 
+=> dont know how to handle each case.
+=> Used a flag in a function, but that will make all error caught from controllers mongodb error  
