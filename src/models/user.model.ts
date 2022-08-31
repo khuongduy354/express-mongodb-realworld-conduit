@@ -7,15 +7,17 @@ export type UserDocument = {
   image: "https://api.realworld.io/images/smiley-cyrus.jpg";
   hashedPassword: string;
   token?: string;
+  followees: Array<mongoose.Types.ObjectId>;
   following?: boolean;
 };
 const UserSchema = new mongoose.Schema(
   {
-    email: { required: true, type: String },
-    username: { required: true, type: String },
+    email: { required: true, type: String, unique: true },
+    username: { required: true, type: String, unique: true },
     hashedPassword: { required: true, type: String },
     bio: { type: String, default: "" },
     image: { type: String, default: "" },
+    followees: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-type CommentDocument = {
-  id: 1;
+export type CommentDocument = {
+  _id: 1;
   createdAt: "2016-02-18T03:22:56.637Z";
   updatedAt: "2016-02-18T03:22:56.637Z";
   body: "It takes a Jacobian";
@@ -9,8 +9,10 @@ type CommentDocument = {
     username: "jake";
     bio: "I work at statefarm";
     image: "https://i.stack.imgur.com/xHWG8.jpg";
-    following: false;
+    following: boolean;
+    followers: Array<mongoose.Types.ObjectId>;
   };
+  articleSlug?: string;
 };
 const CommentSchema = new mongoose.Schema(
   {
@@ -20,6 +22,7 @@ const CommentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    articleSlug: { required: true, type: String },
   },
   { timestamps: true }
 );

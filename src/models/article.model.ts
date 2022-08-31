@@ -1,35 +1,40 @@
 import mongoose from "mongoose";
 
-type ArticleDocument = {
-  slug: "how-to-train-your-dragon";
-  title: "How to train your dragon";
-  description: "Ever wonder how?";
-  body: "It takes a Jacobian";
-  tagList: ["dragons", "training"];
-  createdAt: "2016-02-18T03:22:56.637Z";
-  updatedAt: "2016-02-18T03:48:35.824Z";
-  favorited: false;
-  favoritesCount: 0;
+export type ArticleDocument = {
+  slug: string;
+  title: string;
+  description: string;
+  body: string;
+  tagList: Array<string>;
+  createdAt: String;
+  updatedAt: String;
+  favorited?: boolean;
+  favoritedBy: Array<string>;
   author: {
-    username: "jake";
-    bio: "I work at statefarm";
-    image: "https://i.stack.imgur.com/xHWG8.jpg";
-    following: false;
+    username: string;
+    bio: string;
+    image: string;
+    following: boolean;
   };
+  comments: Array<mongoose.Types.ObjectId>;
 };
 const ArticleSchema = new mongoose.Schema(
   {
-    slug: String,
+    slug: { type: String, unique: true, required: true },
     title: { required: true, type: String },
     description: { required: true, type: String },
     body: { required: true, type: String },
-    tagList: Array,
-    favorited: Boolean,
-    favoritesCount: Number,
+    tagList: { type: [String], default: [] },
+    favoritedBy: { type: [String], default: [] },
     author: {
       required: true,
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "User",
+    },
+    comments: {
+      type: [mongoose.Types.ObjectId],
+      default: [],
+      ref: "Comment",
     },
   },
   { timestamps: true }
