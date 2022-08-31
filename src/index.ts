@@ -1,3 +1,4 @@
+import { configRoute } from "./routes/index";
 import { logger } from "./logger";
 import { configDb } from "./config/mongodb";
 import { rateLimit } from "express-rate-limit";
@@ -5,9 +6,11 @@ import express, { NextFunction, Request, Response } from "express";
 import "dotenv/config";
 import { AppError, errorHandler } from "./error";
 
+//setup app
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+//setup middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const limiter = rateLimit({
@@ -17,9 +20,11 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 app.use(limiter);
+
+//setup routes db
 configDb();
-import { UserRoute } from "./routes/user.route";
-app.use("/v1", UserRoute);
+configRoute(app);
+
 //testing routes
 app.get("/helloworld", (req, res) => {
   res.send("helloworld");
