@@ -5,8 +5,8 @@ export const parseUserResponse = (user: UserDocument) => {
   return {
     user: {
       username: user.username,
-      bio: user.bio ? user.bio : "",
-      image: user.image ? user.image : "",
+      bio: user.bio,
+      image: user.image,
       email: user.email,
       token: user.token,
     },
@@ -52,8 +52,21 @@ export const parseCommentResponse = (comment: CommentDocument) => {
   };
 };
 export const parseCommentsResponse = (comments: Array<CommentDocument>) => {
-  const new_comments = comments.map((comment) => parseCommentResponse(comment));
+  const new_comments = comments.map((comment) => {
+    return { ...parseCommentResponse(comment).comment };
+  });
   return {
     comments: new_comments,
+  };
+};
+
+export const parseProfileResponse = (user: UserDocument) => {
+  return {
+    profile: {
+      username: user.username,
+      bio: user.bio,
+      image: user.image,
+      following: user.following,
+    },
   };
 };

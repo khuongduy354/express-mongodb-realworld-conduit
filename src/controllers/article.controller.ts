@@ -81,12 +81,22 @@ const listArticles = async (
     const { author, favorited, limit, skip, tag } = req.query;
     const _limit = limit ? Number(limit) : 20;
     const _skip = skip ? Number(skip) : 0;
+
     const findObj: any = {};
-    if (author) findObj["author.username"] = author;
+    if (author) {
+      const user = await User.findOne({ username: author }).select("_id");
+      if (user) {
+        findObj.author = user._id;
+      }
+    }
     if (favorited) findObj.favoritedBy = { $in: [favorited] };
     if (tag) findObj.tagList = { $in: [tag] };
 
-    const articles = await Article.find(findObj).limit(_limit).skip(_skip);
+    const articles = await Article.find(findObj)
+      .limit(_limit)
+      .skip(_skip)
+      .sort({ createdAt: -1 })
+      .populate("author", "username bio image");
 
     res.status(200).json(parseArticlesResponse(articles));
   } catch (e) {
@@ -186,23 +196,19 @@ const createComment = async (
     const user = await User.findOne({ username }).select("_id");
 
     if (!user) throw new AppError(400, "User not found");
-    if (!username) throw new AppError(400, "User not found");
 
     const article = await Article.findOne({
       slug,
-      "author.username": username,
+      author: user._id,
     });
     if (!article) throw new AppError(400, "Article not found");
 
     //create comment and push to article
     const comment = await (
-      await Comment.create({ body, author: user._id })
+      await Comment.create({ body, author: user._id, articleSlug: slug })
     ).populate("author", "username bio image");
     article.comments.push(comment._id as any);
     await article.save();
-    //add article slug to comment
-    comment.articleSlug = slug;
-    await comment.save();
 
     //response
     comment.author.following = false;
@@ -214,20 +220,28 @@ const createComment = async (
 const getComments = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { slug } = req.params;
-    const username = req.username;
-
-    const user = await User.findOne({ username }).select("_id followees");
-    if (!user) throw new AppError(400, "User not found");
+    const isAuth = req.isAuth;
 
     const comments = await Comment.find({ articleSlug: slug }).populate(
       "author",
       "username bio image _id"
     );
 
-    comments.forEach((comment) => {
-      //@ts-ignore
-      comment.author.following = user.followees.includes(comment.author._id);
-    });
+    if (isAuth) {
+      const username = req.username;
+      const user = await User.findOne({ username }).select("_id followees");
+      if (!user) throw new AppError(400, "User not found");
+
+      comments.forEach((comment) => {
+        //@ts-ignore
+        comment.author.following = user.followees.includes(comment.author._id);
+      });
+    } else {
+      comments.forEach((comment) => {
+        //@ts-ignore
+        comment.author.following = false;
+      });
+    }
 
     res.status(200).json(parseCommentsResponse(comments));
   } catch (e) {
@@ -242,15 +256,16 @@ const deleteComment = async (
   try {
     const { slug, id } = req.params;
     const username = req.username;
-    if (!username) throw new AppError(400, "User not found");
+    const user = await User.findOne({ username }).select("_id");
+    if (!user) throw new AppError(400, "User not found");
 
     await Comment.findOneAndDelete({
       _id: id,
       articleSlug: slug,
-      "author.username": username,
+      author: user._id,
     });
 
-    res.status(200);
+    res.status(200).json();
   } catch (e) {
     next(new AppError(400, "mongodb error", e));
   }

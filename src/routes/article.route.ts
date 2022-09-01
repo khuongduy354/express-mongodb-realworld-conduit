@@ -1,3 +1,4 @@
+import { optionalAuth } from "./../middlewares/optionalAuth";
 import { auth } from "./../middlewares/auth";
 import { ArticleController } from "./../controllers/article.controller";
 import { Router } from "express";
@@ -29,7 +30,11 @@ router.delete(
 
 //comments
 router.post("/articles/:slug/comments", auth, ArticleController.createComment);
-router.get("/articles/:slug/comments", ArticleController.getComments); //query: limit,skip
+router.get(
+  "/articles/:slug/comments",
+  optionalAuth,
+  ArticleController.getComments
+); //query: limit,skip
 router.delete(
   "/articles/:slug/comments/:id",
   auth,
