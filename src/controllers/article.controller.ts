@@ -31,9 +31,17 @@ const createArticle = async (
       author: user._id,
       slug: slugConvert(title),
     };
-
+    const tagListOperations = tagList.map((tag: string) => {
+      return {
+        updateOne: {
+          filter: { name: { $eq: tag } },
+          update: { name: tag },
+          upsert: true,
+        },
+      };
+    });
     if (tagList) {
-      await Tag.insertMany(tagList.map((tag: string) => ({ name: tag })));
+      await Tag.bulkWrite(tagListOperations);
       articleObj.tagList = tagList;
     }
 
@@ -50,6 +58,7 @@ const createArticle = async (
 };
 const getArticle = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log("here");
     const { slug } = req.params;
     const article = await Article.findOne({ slug }).populate(
       "author",
@@ -290,11 +299,11 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
 
     const user = await User.findOne({ username }).select("_id followees");
     if (!user) throw new AppError(400, "User not found");
+
     const articles = await Article.find({ author: { $in: user.followees } })
       .limit(_limit)
       .skip(_skip)
       .sort({ createdAt: -1 });
-
     res.status(200).json(parseArticlesResponse(articles));
   } catch (e) {
     next(new AppError(400, "mongodb error", e));

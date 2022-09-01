@@ -6,14 +6,14 @@ const router = Router();
 //CRUD articles
 router.post("/articles", auth, ArticleController.createArticle);
 router.get("/articles", ArticleController.listArticles); //query: author,tag,favorited,limit,skip
+//feed
+router.get("/articles/feed", auth, ArticleController.getFeed); //query: limit,skip
 router.get("/articles/:slug", ArticleController.getArticle);
 
 router.delete("/articles/:slug", auth, ArticleController.deleteArticle);
 router.put("/articles/:slug", auth, ArticleController.updateArticle);
 
 //CRUD articles interactions
-//feed
-router.get("/articles/feed", auth, ArticleController.getFeed); //query: limit,skip
 
 //favorite
 router.post(
